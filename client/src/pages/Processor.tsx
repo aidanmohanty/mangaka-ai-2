@@ -94,7 +94,7 @@ const Processor: React.FC = () => {
     }
   };
 
-  const canProcess = (user?.subscription.used || 0) < (user?.subscription.processingQuota || 0);
+  const canProcess = (user?.subscription?.used || 0) < (user?.subscription?.processingQuota || 0);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
