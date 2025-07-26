@@ -60,3 +60,15 @@
       res.status(500).json({ message: 'Server error', error: error.message });
     }
   };
+
+  const user = await users.insertOne({
+    username,
+    email,
+    password: hashedPassword,
+    subscription: {
+      used: 0,
+      processingQuota: 100,
+      tier: 'free'
+    },
+    createdAt: new Date()
+  });
