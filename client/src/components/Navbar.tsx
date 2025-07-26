@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
                   <UserCircleIcon size={20} />
                   <span className="font-medium">{user.username}</span>
                   <div className="text-xs bg-gradient-to-r from-orange-400 to-pink-400 px-2 py-1 rounded-full">
-                    {user.subscription.used}/{user.subscription.processingQuota}
+                     {user?.subscription ? `${user.subscription.used}/${user.subscription.processingQuota}` : '0/100'}
                   </div>
                 </div>
                 <button
