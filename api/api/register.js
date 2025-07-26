@@ -1,6 +1,6 @@
- import bcrypt from 'bcryptjs';
-  import jwt from 'jsonwebtoken';
-  import { MongoClient } from 'mongodb';
+ const bcrypt = require('bcryptjs');
+  const jwt = require('jsonwebtoken');
+  const { MongoClient } = require('mongodb');
 
   let cachedDb = null;
 
@@ -12,7 +12,7 @@
     return cachedDb;
   }
 
-  export default async function handler(req, res) {
+  module.exports = async function handler(req, res) {
     if (req.method !== 'POST') {
       return res.status(405).json({ message: 'Method not allowed' });
     }
@@ -59,4 +59,4 @@
     } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
     }
-  }
+  };
