@@ -10,12 +10,12 @@ const Settings: React.FC = () => {
   const [message, setMessage] = useState('');
   
   const [preferences, setPreferences] = useState({
-    defaultLanguage: user?.preferences.defaultLanguage || 'en',
-    autoColoring: user?.preferences.autoColoring || false,
-    coloringStyle: user?.preferences.coloringStyle || 'anime',
+    defaultLanguage: user?.preferences?.defaultLanguage || 'en',
+    autoColoring: user?.preferences?.autoColoring || false,
+    coloringStyle: user?.preferences?.coloringStyle || 'anime',
     textStyle: {
-      fontSize: user?.preferences.textStyle.fontSize || 'medium',
-      fontFamily: user?.preferences.textStyle.fontFamily || 'Arial'
+      fontSize: user?.preferences?.textStyle.fontSize || 'medium',
+      fontFamily: user?.preferences?.textStyle.fontFamily || 'Arial'
     }
   });
 
