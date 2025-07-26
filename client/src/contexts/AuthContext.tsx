@@ -89,23 +89,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(user);
   };
 
-  const register = async (userData) => {
-    try {
-      const response = await axios.post('/api/auth/register', userData);
-
-      // Set user data
-      setUser(response.data.user);
-      setToken(response.data.token);
-      localStorage.setItem('token', response.data.token);
-
-      // ADD THIS LINE:
-      navigate('/dashboard');
-
-    } catch (error) {
-      // handle error
-    }
-  };
-
   const logout = () => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
