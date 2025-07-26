@@ -1,114 +1,195 @@
-  import React from 'react';
-  import { User, Upload, History, Settings, LogOut, Zap, Star, Globe } from 'lucide-react';
-  import { useAuth } from '../contexts/AuthContext';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { motion } from 'framer-motion';
+import { 
+  SparklesIcon, 
+  ClockIcon, 
+  TrendingUpIcon,
+  FileImageIcon,
+  GlobeIcon,
+  PaletteIcon
+} from 'lucide-react';
 
-  const Dashboard: React.FC = () => {
-    const { user, logout } = useAuth();
+const Dashboard: React.FC = () => {
+  const { user } = useAuth();
 
-    const stats = [
-      { label: 'Images Translated', value: '0', icon: Globe },
-      { label: 'Pages Processed', value: '0', icon: Zap },
-      { label: 'Credits Remaining', value: '100', icon: Star },
-    ];
+  const stats = [
+    {
+      label: 'Pages Processed',
+      value: user?.subscription.used || 0,
+      icon: FileImageIcon,
+      color: 'from-blue-400 to-blue-600'
+    },
+    {
+      label: 'Quota Remaining',
+      value: (user?.subscription.processingQuota || 0) - (user?.subscription.used || 0),
+      icon: TrendingUpIcon,
+      color: 'from-green-400 to-green-600'
+    },
+    {
+      label: 'Languages',
+      value: '6+',
+      icon: GlobeIcon,
+      color: 'from-purple-400 to-purple-600'
+    },
+    {
+      label: 'AI Styles',
+      value: '4',
+      icon: PaletteIcon,
+      color: 'from-orange-400 to-orange-600'
+    }
+  ];
 
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        {/* Navigation */}
-        <nav className="backdrop-blur-md bg-white/10 border-b border-white/20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <h1 className="text-xl font-bold text-white">Mangaka.AI</h1>
-              </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-white/80">Welcome, {user?.username}</span>
-                <button
-                  onClick={logout}
-                  className="p-2 text-white/80 hover:text-white transition-colors"
-                >
-                  <LogOut size={20} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </nav>
+  const quickActions = [
+    {
+      title: 'Process New Image',
+      description: 'Upload or paste URL to translate manga',
+      icon: SparklesIcon,
+      link: '/process',
+      color: 'from-orange-400 to-pink-400'
+    },
+    {
+      title: 'View History',
+      description: 'See your previous translations',
+      icon: ClockIcon,
+      link: '/history',
+      color: 'from-blue-400 to-purple-400'
+    }
+  ];
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">Dashboard</h2>
-            <p className="text-white/70">Transform your manga with AI-powered translation</p>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="backdrop-blur-md bg-white/10 rounded-xl p-6 border border-white/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white/70 text-sm">{stat.label}</p>
-                    <p className="text-2xl font-bold text-white">{stat.value}</p>
-                  </div>
-                  <stat.icon className="h-8 w-8 text-purple-400" />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Main Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Upload Section */}
-            <div className="backdrop-blur-md bg-white/10 rounded-xl p-8 border border-white/20">
-              <div className="text-center">
-                <Upload className="h-12 w-12 text-purple-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Upload Manga</h3>
-                <p className="text-white/70 mb-6">Upload your manga images for AI translation</p>
-                <button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 px-6 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium">
-                  Choose Files
-                </button>
-              </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="backdrop-blur-md bg-white/10 rounded-xl p-8 border border-white/20">
-              <div className="flex items-center mb-4">
-                <History className="h-6 w-6 text-purple-400 mr-2" />
-                <h3 className="text-xl font-semibold text-white">Recent Activity</h3>
-              </div>
-              <div className="space-y-3">
-                <div className="text-center py-8">
-                  <p className="text-white/50">No recent activity</p>
-                  <p className="text-white/40 text-sm">Upload your first manga to get started!</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <button className="backdrop-blur-md bg-white/5 hover:bg-white/10 rounded-lg p-4 border border-white/20 transition-all duration-200 group">
-              <Upload className="h-6 w-6 text-purple-400 mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-white text-sm font-medium">New Translation</p>
-            </button>
-
-            <button className="backdrop-blur-md bg-white/5 hover:bg-white/10 rounded-lg p-4 border border-white/20 transition-all duration-200 group">
-              <History className="h-6 w-6 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-white text-sm font-medium">View History</p>
-            </button>
-
-            <button className="backdrop-blur-md bg-white/5 hover:bg-white/10 rounded-lg p-4 border border-white/20 transition-all duration-200 group">
-              <Settings className="h-6 w-6 text-green-400 mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-white text-sm font-medium">Settings</p>
-            </button>
-
-            <button className="backdrop-blur-md bg-white/5 hover:bg-white/10 rounded-lg p-4 border border-white/20 transition-all duration-200 group">
-              <Star className="h-6 w-6 text-yellow-400 mb-2 group-hover:scale-110 transition-transform" />
-              <p className="text-white text-sm font-medium">Upgrade Plan</p>
-            </button>
-          </div>
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+            Welcome back, {user?.username}!
+          </h1>
+          <p className="text-white/70 text-lg">
+            Ready to translate some manga today?
+          </p>
         </div>
-      </div>
-    );
-  };
 
-  export default Dashboard;
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="glass rounded-xl p-6"
+              >
+                <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-lg flex items-center justify-center mb-4`}>
+                  <Icon size={24} className="text-white" />
+                </div>
+                <div className="text-2xl font-bold text-white mb-1">
+                  {stat.value}
+                </div>
+                <div className="text-white/60 text-sm">
+                  {stat.label}
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          {quickActions.map((action, index) => {
+            const Icon = action.icon;
+            return (
+              <motion.div
+                key={action.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 + index * 0.1 }}
+              >
+                <Link
+                  to={action.link}
+                  className="block glass rounded-xl p-6 hover:bg-white/15 transition-all duration-300 group"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className={`w-12 h-12 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                      <Icon size={24} className="text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-xl font-semibold text-white mb-2">
+                        {action.title}
+                      </h3>
+                      <p className="text-white/70">
+                        {action.description}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Subscription Status */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="glass rounded-xl p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold text-white">
+              Subscription Status
+            </h3>
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              user?.subscription.type === 'free' 
+                ? 'bg-gray-500/20 text-gray-300'
+                : user?.subscription.type === 'premium'
+                ? 'bg-orange-500/20 text-orange-300'
+                : 'bg-purple-500/20 text-purple-300'
+            }`}>
+              {user?.subscription.type?.toUpperCase()}
+            </span>
+          </div>
+          
+          <div className="space-y-3">
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-white/70">Usage this month</span>
+                <span className="text-white">
+                  {user?.subscription.used}/{user?.subscription.processingQuota}
+                </span>
+              </div>
+              <div className="w-full bg-white/10 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-orange-400 to-pink-400 h-2 rounded-full transition-all duration-300"
+                  style={{ 
+                    width: `${((user?.subscription.used || 0) / (user?.subscription.processingQuota || 1)) * 100}%` 
+                  }}
+                />
+              </div>
+            </div>
+            
+            {user?.subscription.type === 'free' && (
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-white/70 text-sm mb-3">
+                  Upgrade to Premium for unlimited processing and AI coloring
+                </p>
+                <button className="bg-gradient-to-r from-orange-400 to-pink-400 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-500 hover:to-pink-500 transition-all duration-300">
+                  Upgrade Now
+                </button>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Dashboard;
