@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   id: string;
@@ -86,6 +87,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem('token', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setUser(user);
+  };
+
+  const register = async (userData) => {
+    try {
+      const response = await axios.post('/api/auth/register', userData);
+
+      // Set user data
+      setUser(response.data.user);
+      setToken(response.data.token);
+      localStorage.setItem('token', response.data.token);
+
+      // ADD THIS LINE:
+      navigate('/dashboard');
+
+    } catch (error) {
+      // handle error
+    }
   };
 
   const logout = () => {
