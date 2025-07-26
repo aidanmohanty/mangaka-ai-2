@@ -17,13 +17,13 @@ const Dashboard: React.FC = () => {
   const stats = [
     {
       label: 'Pages Processed',
-      value: user?.subscription.used || 0,
+      value: user?.subscription?.used || 0,
       icon: FileImageIcon,
       color: 'from-blue-400 to-blue-600'
     },
     {
       label: 'Quota Remaining',
-      value: (user?.subscription.processingQuota || 0) - (user?.subscription.used || 0),
+      value: (user?.subscription?.processingQuota || 0) - (user?.subscription?.used || 0),
       icon: TrendingUpIcon,
       color: 'from-green-400 to-green-600'
     },
@@ -147,13 +147,13 @@ const Dashboard: React.FC = () => {
               Subscription Status
             </h3>
             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              user?.subscription.type === 'free' 
+              user?.subscription?.type === 'free' 
                 ? 'bg-gray-500/20 text-gray-300'
-                : user?.subscription.type === 'premium'
+                : user?.subscription?.type === 'premium'
                 ? 'bg-orange-500/20 text-orange-300'
                 : 'bg-purple-500/20 text-purple-300'
             }`}>
-              {user?.subscription.type?.toUpperCase()}
+              {user?.subscription?.type?.toUpperCase()}
             </span>
           </div>
           
@@ -162,20 +162,20 @@ const Dashboard: React.FC = () => {
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-white/70">Usage this month</span>
                 <span className="text-white">
-                  {user?.subscription.used}/{user?.subscription.processingQuota}
+                  {user?.subscription?.used}/{user?.subscription?.processingQuota}
                 </span>
               </div>
               <div className="w-full bg-white/10 rounded-full h-2">
                 <div 
                   className="bg-gradient-to-r from-orange-400 to-pink-400 h-2 rounded-full transition-all duration-300"
                   style={{ 
-                    width: `${((user?.subscription.used || 0) / (user?.subscription.processingQuota || 1)) * 100}%` 
+                    width: `${((user?.subscription?.used || 0) / (user?.subscription?.processingQuota || 1)) * 100}%` 
                   }}
                 />
               </div>
             </div>
             
-            {user?.subscription.type === 'free' && (
+            {user?.subscription?.type === 'free' && (
               <div className="pt-4 border-t border-white/10">
                 <p className="text-white/70 text-sm mb-3">
                   Upgrade to Premium for unlimited processing and AI coloring
