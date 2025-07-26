@@ -14,9 +14,9 @@ const Processor: React.FC = () => {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [url, setUrl] = useState('');
-  const [targetLanguage, setTargetLanguage] = useState(user?.preferences.defaultLanguage || 'en');
-  const [enableColoring, setEnableColoring] = useState(user?.preferences.autoColoring || false);
-  const [coloringStyle, setColoringStyle] = useState(user?.preferences.coloringStyle || 'anime');
+  const [targetLanguage, setTargetLanguage] = useState(user?.preferences?.defaultLanguage || 'en');
+  const [enableColoring, setEnableColoring] = useState(user?.preferences?.autoColoring || false);
+  const [coloringStyle, setColoringStyle] = useState(user?.preferences?.coloringStyle || 'anime');
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [dragActive, setDragActive] = useState(false);
