@@ -1,3 +1,14 @@
+
+// Validate required environment variables
+const requiredEnvVars = ['JWT_SECRET', 'MONGODB_URI'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
+  console.error('Please create a .env file with the required variables.');
+  process.exit(1);
+}
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -52,16 +63,7 @@ app.use('/uploads', express.static('uploads'));
 // Routes
 app.use('/api/auth', authRoutes);
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-
-const upload = multer({ storage });
+// Secure file upload configurationconst storage = multer.diskStorage({  destination: (req, file, cb) => {    cb(null, "uploads/");  },  filename: (req, file, cb) => {    // Sanitize filename and add timestamp    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");    cb(null, Date.now() + "-" + sanitizedName);  }});// File filter for securityconst fileFilter = (req, file, cb) => {  const allowedTypes = (process.env.ALLOWED_FILE_TYPES || "image/jpeg,image/png,image/webp").split(",");    if (allowedTypes.includes(file.mimetype)) {    cb(null, true);  } else {    cb(new Error(`File type ${file.mimetype} not allowed. Allowed types: ${allowedTypes.join(", ")}`), false);  }};const upload = multer({   storage,  fileFilter,  limits: {    fileSize: (parseInt(process.env.MAX_FILE_SIZE_MB) || 10) * 1024 * 1024, // Default 10MB    files: 1 // Only allow 1 file per upload  }});
 
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
@@ -72,7 +74,7 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Access token required' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret', async (err, decoded) => {
+  jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) {
       return res.status(403).json({ error: 'Invalid token' });
     }
@@ -87,6 +89,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Multer error handling middlewareapp.use((error, req, res, next) => {  if (error instanceof multer.MulterError) {    if (error.code === "LIMIT_FILE_SIZE") {      return res.status(400).json({ error: "File too large. Maximum size: " + (process.env.MAX_FILE_SIZE_MB || 10) + "MB" });    }    if (error.code === "LIMIT_FILE_COUNT") {      return res.status(400).json({ error: "Too many files. Only 1 file allowed per upload." });    }    return res.status(400).json({ error: "File upload error: " + error.message });  }  if (error.message && error.message.includes("File type")) {    return res.status(400).json({ error: error.message });  }  next(error);});
 app.post('/api/upload', authenticateToken, upload.single('manga'), async (req, res) => {
   try {
     if (!req.file) {
