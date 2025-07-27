@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -13,18 +13,9 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { register } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,10 +40,7 @@ const Register: React.FC = () => {
 
     try {
       await register(username, email, password);
-      // Small delay to ensure state updates are processed
-      timeoutRef.current = setTimeout(() => {
-        navigate('/dashboard', { replace: true });
-      }, 100);
+      navigate('/dashboard', { replace: true });
     } catch (error: any) {
       console.error('Registration error:', error);
       const errorMessage = error.response?.data?.error || 
@@ -60,6 +48,7 @@ const Register: React.FC = () => {
                           error.message || 
                           'Registration failed. Please try again.';
       setError(errorMessage);
+    } finally {
       setLoading(false);
     }
   };

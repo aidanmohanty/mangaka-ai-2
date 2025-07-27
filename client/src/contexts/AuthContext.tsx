@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
+import React, { createContext, useContext, useEffect, ReactNode, useRef, useReducer } from 'react';
 import axios from 'axios';
 
 interface User {
@@ -20,6 +20,52 @@ interface User {
     used: number;
   };
 }
+
+interface AuthState {
+  user: User | null;
+  loading: boolean;
+  initialized: boolean;
+}
+
+type AuthAction = 
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_USER'; payload: User | null }
+  | { type: 'SET_INITIALIZED'; payload: boolean }
+  | { type: 'LOGOUT' }
+  | { type: 'UPDATE_PREFERENCES'; payload: Partial<User['preferences']> };
+
+const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+  switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
+    case 'SET_USER':
+      return { ...state, user: action.payload, loading: false, initialized: true };
+    case 'SET_INITIALIZED':
+      return { ...state, initialized: action.payload };
+    case 'LOGOUT':
+      return { ...state, user: null, loading: false };
+    case 'UPDATE_PREFERENCES':
+      if (!state.user) return state;
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          preferences: {
+            ...state.user.preferences,
+            ...action.payload
+          }
+        }
+      };
+    default:
+      return state;
+  }
+};
+
+const initialState: AuthState = {
+  user: null,
+  loading: true,
+  initialized: false
+};
 
 interface AuthContextType {
   user: User | null;
@@ -45,57 +91,51 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const isMountedRef = useRef(true);
+  const [state, dispatch] = useReducer(authReducer, initialState);
+  const mountedRef = useRef(true);
+  const initRef = useRef(false);
 
   useEffect(() => {
     return () => {
-      isMountedRef.current = false;
+      mountedRef.current = false;
     };
   }, []);
 
   useEffect(() => {
-    const abortController = new AbortController();
-    
-    const fetchUser = async () => {
+    // Prevent double initialization
+    if (initRef.current) return;
+    initRef.current = true;
+
+    const initializeAuth = async () => {
       try {
-        const response = await axios.get('/api/auth/me', {
-          signal: abortController.signal
-        });
-        if (isMountedRef.current && !abortController.signal.aborted) {
-          setUser(response.data);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          if (mountedRef.current) {
+            dispatch({ type: 'SET_USER', payload: null });
+          }
+          return;
         }
-      } catch (error: any) {
-        if (error.name === 'AbortError' || abortController.signal.aborted) {
-          return; // Request was cancelled, don't update state
+
+        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        
+        const response = await axios.get('/api/auth/me');
+        
+        if (mountedRef.current) {
+          dispatch({ type: 'SET_USER', payload: response.data });
         }
-        console.error('Failed to fetch user:', error);
+      } catch (error) {
+        console.error('Auth initialization failed:', error);
         localStorage.removeItem('token');
         delete axios.defaults.headers.common['Authorization'];
-        if (isMountedRef.current) {
-          setUser(null);
-        }
-      } finally {
-        if (isMountedRef.current && !abortController.signal.aborted) {
-          setLoading(false);
+        
+        if (mountedRef.current) {
+          dispatch({ type: 'SET_USER', payload: null });
         }
       }
     };
 
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      fetchUser();
-    } else {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
-    }
-
-    return () => {
-      abortController.abort();
-    };
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -106,8 +146,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      if (isMountedRef.current) {
-        setUser(user);
+      if (mountedRef.current) {
+        dispatch({ type: 'SET_USER', payload: user });
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -123,8 +163,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
-      if (isMountedRef.current) {
-        setUser(user);
+      if (mountedRef.current) {
+        dispatch({ type: 'SET_USER', payload: user });
       }
     } catch (error) {
       console.error('Registration failed:', error);
@@ -135,22 +175,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
-    if (isMountedRef.current) {
-      setUser(null);
+    
+    if (mountedRef.current) {
+      dispatch({ type: 'LOGOUT' });
     }
   };
 
   const updatePreferences = async (preferences: Partial<User['preferences']>) => {
     try {
       await axios.put('/api/preferences', { preferences });
-      if (user && isMountedRef.current) {
-        setUser({
-          ...user,
-          preferences: {
-            ...user.preferences,
-            ...preferences
-          }
-        });
+      
+      if (mountedRef.current) {
+        dispatch({ type: 'UPDATE_PREFERENCES', payload: preferences });
       }
     } catch (error) {
       console.error('Failed to update preferences:', error);
@@ -158,12 +194,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const value = {
-    user,
+  const value: AuthContextType = {
+    user: state.user,
     login,
     register,
     logout,
-    loading,
+    loading: state.loading,
     updatePreferences
   };
 

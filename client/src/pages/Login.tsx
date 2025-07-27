@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
@@ -11,18 +11,9 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { login } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +22,7 @@ const Login: React.FC = () => {
 
     try {
       await login(email, password);
-      // Small delay to ensure state updates are processed
-      timeoutRef.current = setTimeout(() => {
-        navigate('/dashboard', { replace: true });
-      }, 100);
+      navigate('/dashboard', { replace: true });
     } catch (error: any) {
       console.error('Login error:', error);
       const errorMessage = error.response?.data?.error || 
@@ -42,6 +30,7 @@ const Login: React.FC = () => {
                           error.message || 
                           'Login failed. Please try again.';
       setError(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
