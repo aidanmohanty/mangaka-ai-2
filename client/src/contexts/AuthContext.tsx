@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 interface User {
@@ -48,7 +47,6 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -80,8 +78,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setUser(user);
     
-    // Redirect to dashboard after successful login
-    navigate('/dashboard');
+    // Use window.location instead of navigate
+    window.location.href = '/dashboard';
   };
 
   const register = async (username: string, email: string, password: string) => {
@@ -92,8 +90,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setUser(user);
     
-    // Redirect to dashboard after successful registration
-    navigate('/dashboard');
+    // Use window.location instead of navigate
+    window.location.href = '/dashboard';
   };
 
   const logout = () => {
@@ -101,8 +99,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
     
-    // Redirect to home page after logout
-    navigate('/');
+    // Use window.location instead of navigate
+    window.location.href = '/';
   };
 
   const updatePreferences = async (preferences: Partial<User['preferences']>) => {
