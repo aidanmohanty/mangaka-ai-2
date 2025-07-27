@@ -24,7 +24,12 @@ const Login: React.FC = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Login failed');
+      console.error('Login error:', error);
+      const errorMessage = error.response?.data?.error || 
+                          error.response?.data?.message || 
+                          error.message || 
+                          'Login failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -10,6 +10,7 @@ import Processor from './pages/Processor';
 import Settings from './pages/Settings';
 import History from './pages/History';
 import LoadingSpinner from './components/LoadingSpinner';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const App: React.FC = () => {
   const { user, loading } = useAuth();
@@ -23,47 +24,49 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
-      <div className="bg-hero-pattern min-h-screen">
-        <Navbar />
-        <Routes>
-          {/* Public routes */}
-          <Route 
-            path="/" 
-            element={user ? <Navigate to="/dashboard" /> : <Landing />} 
-          />
-          <Route 
-            path="/login" 
-            element={user ? <Navigate to="/dashboard" /> : <Login />} 
-          />
-          <Route 
-            path="/register" 
-            element={user ? <Navigate to="/dashboard" /> : <Register />} 
-          />
-          
-          {/* Protected routes */}
-          <Route 
-            path="/dashboard" 
-            element={user ? <Dashboard /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/process" 
-            element={user ? <Processor /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/settings" 
-            element={user ? <Settings /> : <Navigate to="/login" />} 
-          />
-          <Route 
-            path="/history" 
-            element={user ? <History /> : <Navigate to="/login" />} 
-          />
-          
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
+        <div className="bg-hero-pattern min-h-screen">
+          <Navbar />
+          <Routes>
+            {/* Public routes */}
+            <Route 
+              path="/" 
+              element={user ? <Navigate to="/dashboard" replace /> : <Landing />} 
+            />
+            <Route 
+              path="/login" 
+              element={user ? <Navigate to="/dashboard" replace /> : <Login />} 
+            />
+            <Route 
+              path="/register" 
+              element={user ? <Navigate to="/dashboard" replace /> : <Register />} 
+            />
+            
+            {/* Protected routes */}
+            <Route 
+              path="/dashboard" 
+              element={user ? <Dashboard /> : <Navigate to="/login" replace />} 
+            />
+            <Route 
+              path="/process" 
+              element={user ? <Processor /> : <Navigate to="/login" replace />} 
+            />
+            <Route 
+              path="/settings" 
+              element={user ? <Settings /> : <Navigate to="/login" replace />} 
+            />
+            <Route 
+              path="/history" 
+              element={user ? <History /> : <Navigate to="/login" replace />} 
+            />
+            
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 };
 

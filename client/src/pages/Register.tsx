@@ -42,7 +42,12 @@ const Register: React.FC = () => {
       await register(username, email, password);
       navigate('/dashboard');
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Registration failed');
+      console.error('Registration error:', error);
+      const errorMessage = error.response?.data?.error || 
+                          error.response?.data?.message || 
+                          error.message || 
+                          'Registration failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
