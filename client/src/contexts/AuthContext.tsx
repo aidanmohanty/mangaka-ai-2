@@ -5,7 +5,7 @@ interface User {
   id: string;
   username: string;
   email: string;
-  preferences?: {
+  preferences: {
     defaultLanguage: string;
     autoColoring: boolean;
     coloringStyle: string;
@@ -14,7 +14,7 @@ interface User {
       fontFamily: string;
     };
   };
-  subscription?: {
+  subscription: {
     type: string;
     processingQuota: number;
     used: number;
@@ -77,9 +77,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem('token', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setUser(user);
-    
-    // Use window.location instead of navigate
-    window.location.href = '/dashboard';
   };
 
   const register = async (username: string, email: string, password: string) => {
@@ -89,18 +86,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.setItem('token', token);
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setUser(user);
-    
-    // Use window.location instead of navigate
-    window.location.href = '/dashboard';
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
-    
-    // Use window.location instead of navigate
-    window.location.href = '/';
   };
 
   const updatePreferences = async (preferences: Partial<User['preferences']>) => {
