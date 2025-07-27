@@ -74,3 +74,6 @@ data/
 
 # Redis dump
 dump.rdb
+# Environment variables
+.env
+!.env.example
