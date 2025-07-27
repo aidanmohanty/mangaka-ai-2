@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import axios from 'axios';
 
 interface User {
@@ -47,19 +47,32 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await axios.get('/api/auth/me');
-        setUser(response.data);
+        if (isMountedRef.current) {
+          setUser(response.data);
+        }
       } catch (error) {
         console.error('Failed to fetch user:', error);
         localStorage.removeItem('token');
         delete axios.defaults.headers.common['Authorization'];
-        setUser(null);
+        if (isMountedRef.current) {
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
       }
     };
 
@@ -68,7 +81,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       fetchUser();
     } else {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -79,7 +94,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(user);
+      
+      if (isMountedRef.current) {
+        setUser(user);
+      }
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -93,7 +111,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(user);
+      
+      if (isMountedRef.current) {
+        setUser(user);
+      }
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;
@@ -103,13 +124,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     delete axios.defaults.headers.common['Authorization'];
-    setUser(null);
+    if (isMountedRef.current) {
+      setUser(null);
+    }
   };
 
   const updatePreferences = async (preferences: Partial<User['preferences']>) => {
     try {
       await axios.put('/api/preferences', { preferences });
-      if (user) {
+      if (user && isMountedRef.current) {
         setUser({
           ...user,
           preferences: {
