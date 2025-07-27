@@ -1,6 +1,16 @@
 import React, { createContext, useContext, useEffect, ReactNode, useRef, useReducer } from 'react';
 import axios from 'axios';
 
+// Validate user object structure
+const validateUser = (user: any): boolean => {
+  return user && 
+         typeof user.id === 'string' &&
+         typeof user.username === 'string' &&
+         typeof user.email === 'string' &&
+         user.preferences &&
+         user.subscription;
+};
+
 interface User {
   id: string;
   username: string;
@@ -121,8 +131,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         const response = await axios.get('/api/auth/me');
         
-        if (mountedRef.current) {
+        if (mountedRef.current && validateUser(response.data)) {
           dispatch({ type: 'SET_USER', payload: response.data });
+        } else if (mountedRef.current) {
+          // Invalid user data, clear auth
+          localStorage.removeItem('token');
+          delete axios.defaults.headers.common['Authorization'];
+          dispatch({ type: 'SET_USER', payload: null });
         }
       } catch (error) {
         console.error('Auth initialization failed:', error);
@@ -143,6 +158,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await axios.post('/api/auth/login', { email, password });
       const { token, user } = response.data;
       
+      if (!token || !user || !validateUser(user)) {
+        throw new Error('Invalid login response');
+      }
+      
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       
@@ -159,6 +178,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await axios.post('/api/auth/register', { username, email, password });
       const { token, user } = response.data;
+      
+      if (!token || !user || !validateUser(user)) {
+        throw new Error('Invalid registration response');
+      }
       
       localStorage.setItem('token', token);
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
