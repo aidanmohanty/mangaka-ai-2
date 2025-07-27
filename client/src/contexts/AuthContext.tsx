@@ -56,13 +56,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    const abortController = new AbortController();
+    
     const fetchUser = async () => {
       try {
-        const response = await axios.get('/api/auth/me');
-        if (isMountedRef.current) {
+        const response = await axios.get('/api/auth/me', {
+          signal: abortController.signal
+        });
+        if (isMountedRef.current && !abortController.signal.aborted) {
           setUser(response.data);
         }
-      } catch (error) {
+      } catch (error: any) {
+        if (error.name === 'AbortError' || abortController.signal.aborted) {
+          return; // Request was cancelled, don't update state
+        }
         console.error('Failed to fetch user:', error);
         localStorage.removeItem('token');
         delete axios.defaults.headers.common['Authorization'];
@@ -70,7 +77,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setUser(null);
         }
       } finally {
-        if (isMountedRef.current) {
+        if (isMountedRef.current && !abortController.signal.aborted) {
           setLoading(false);
         }
       }
@@ -85,6 +92,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
       }
     }
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
