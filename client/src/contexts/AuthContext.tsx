@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import axios from 'axios';
 
 interface User {
@@ -48,6 +48,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await axios.get('/api/auth/me');
+      setUser(response.data);
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -56,36 +70,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [fetchUser]);
 
-  const fetchUser = async () => {
+  const login = async (email: string, password: string) => {
     try {
-      const response = await axios.get('/api/auth/me');
-      setUser(response.data);
+      const response = await axios.post('/api/auth/login', { email, password });
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser(user);
     } catch (error) {
-      localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
-    } finally {
-      setLoading(false);
+      console.error('Login failed:', error);
+      throw error;
     }
   };
 
-  const login = async (email: string, password: string) => {
-    const response = await axios.post('/api/auth/login', { email, password });
-    const { token, user } = response.data;
-    
-    localStorage.setItem('token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(user);
-  };
-
   const register = async (username: string, email: string, password: string) => {
-    const response = await axios.post('/api/auth/register', { username, email, password });
-    const { token, user } = response.data;
-    
-    localStorage.setItem('token', token);
-    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(user);
+    try {
+      const response = await axios.post('/api/auth/register', { username, email, password });
+      const { token, user } = response.data;
+      
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      setUser(user);
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   };
 
   const logout = () => {
@@ -95,15 +107,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const updatePreferences = async (preferences: Partial<User['preferences']>) => {
-    await axios.put('/api/preferences', { preferences });
-    if (user) {
-      setUser({
-        ...user,
-        preferences: {
-          ...user.preferences,
-          ...preferences
-        }
-      });
+    try {
+      await axios.put('/api/preferences', { preferences });
+      if (user) {
+        setUser({
+          ...user,
+          preferences: {
+            ...user.preferences,
+            ...preferences
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Failed to update preferences:', error);
+      throw error;
     }
   };
 
