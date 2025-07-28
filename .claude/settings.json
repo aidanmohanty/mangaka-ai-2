@@ -1,0 +1,57 @@
+{
+  "agents": {
+    "mangaka-ai-developer": {
+      "description": "Main development agent for mangaka.ai project - handles features, bugs, architecture",
+      "enabled": true
+    },
+    "mangaka-art-reviewer": {
+      "description": "Reviews visual assets, artwork, character designs, UI elements",
+      "enabled": true
+    },
+    "mangaka-code-reviewer": {
+      "description": "Reviews code for errors, bugs, quality issues",
+      "enabled": true
+    },
+    "mangaka-code-tester": {
+      "description": "Tests code functionality before deployment",
+      "enabled": true
+    },
+    "mangaka-visual-quality-manager": {
+      "description": "Oversees visual quality standards across manga/anime workflows",
+      "enabled": true
+    },
+    "mangaka-visual-style-coordinator": {
+      "description": "Ensures style consistency and design standards",
+      "enabled": true
+    },
+    "mangaka-ui-ux-optimizer": {
+      "description": "Optimizes interface and user experience",
+      "enabled": true
+    }
+  },
+  "project": {
+    "name": "mangaka-ai",
+    "version": "1.0",
+    "type": "fullstack-web-app",
+    "technologies": ["React", "TypeScript", "Node.js", "Python", "AI/ML"],
+    "structure": {
+      "client": "React TypeScript frontend",
+      "server": "Node.js backend API",
+      "ai-service": "Python AI/ML service"
+    }
+  },
+  "workflows": {
+    "code_review": {
+      "enabled": true,
+      "agents": ["mangaka-code-reviewer", "mangaka-ai-developer"]
+    },
+    "testing": {
+      "enabled": true,
+      "agents": ["mangaka-code-tester"]
+    },
+    "visual_review": {
+      "enabled": true,
+      "agents": ["mangaka-art-reviewer", "mangaka-visual-quality-manager"]
+    }
+  }
+}
