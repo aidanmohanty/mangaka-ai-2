@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { EyeIcon, EyeOffIcon, MailIcon, LockIcon, UserIcon } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getAuthErrorMessage } from '../utils/errorUtils';
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -42,7 +43,7 @@ const Register: React.FC = () => {
       await register(username, email, password);
       navigate('/dashboard');
     } catch (error: any) {
-      setError(error.response?.data?.error || 'Registration failed');
+      setError(getAuthErrorMessage(error));
     } finally {
       setLoading(false);
     }
