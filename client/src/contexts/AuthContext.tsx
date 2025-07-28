@@ -3,12 +3,37 @@ import axios from 'axios';
 
 // Validate user object structure
 const validateUser = (user: any): boolean => {
-  return user && 
-         typeof user.id === 'string' &&
-         typeof user.username === 'string' &&
-         typeof user.email === 'string' &&
-         user.preferences &&
-         user.subscription;
+  if (!user) {
+    console.error('User validation failed: user is null/undefined');
+    return false;
+  }
+  
+  if (typeof user.id !== 'string') {
+    console.error('User validation failed: id is not string', typeof user.id, user.id);
+    return false;
+  }
+  
+  if (typeof user.username !== 'string') {
+    console.error('User validation failed: username is not string', typeof user.username);
+    return false;
+  }
+  
+  if (typeof user.email !== 'string') {
+    console.error('User validation failed: email is not string', typeof user.email);
+    return false;
+  }
+  
+  if (!user.preferences) {
+    console.error('User validation failed: preferences missing', user.preferences);
+    return false;
+  }
+  
+  if (!user.subscription) {
+    console.error('User validation failed: subscription missing', user.subscription);
+    return false;
+  }
+  
+  return true;
 };
 
 interface User {
@@ -176,11 +201,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const register = async (username: string, email: string, password: string) => {
     try {
+      console.log('Attempting registration for:', username, email);
       const response = await axios.post('/api/auth/register', { username, email, password });
+      console.log('Registration response:', response.data);
+      
       const { token, user } = response.data;
       
-      if (!token || !user || !validateUser(user)) {
-        throw new Error('Invalid registration response');
+      if (!token) {
+        console.error('Registration failed: No token in response');
+        throw new Error('No authentication token received');
+      }
+      
+      if (!user) {
+        console.error('Registration failed: No user data in response');
+        throw new Error('No user data received');
+      }
+      
+      console.log('Validating user data:', user);
+      if (!validateUser(user)) {
+        console.error('Registration failed: User validation failed');
+        throw new Error('Invalid user data structure');
       }
       
       localStorage.setItem('token', token);
@@ -189,6 +229,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (mountedRef.current) {
         dispatch({ type: 'SET_USER', payload: user });
       }
+      
+      console.log('Registration successful');
     } catch (error) {
       console.error('Registration failed:', error);
       throw error;

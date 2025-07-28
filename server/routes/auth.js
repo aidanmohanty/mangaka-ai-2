@@ -41,7 +41,7 @@ router.post('/register', [
     res.status(201).json({
       token,
       user: {
-        id: user._id,
+        id: user._id.toString(),
         username: user.username,
         email: user.email,
         preferences: user.preferences,
@@ -110,7 +110,7 @@ router.post('/login', [
     res.json({
       token,
       user: {
-        id: user._id,
+        id: user._id.toString(),
         username: user.username,
         email: user.email,
         preferences: user.preferences,
