@@ -3,14 +3,30 @@ import axios from 'axios';
 
 // Validate user object structure
 const validateUser = (user: any): boolean => {
+  console.log('=== USER VALIDATION DEBUG ===');
+  console.log('Full user object:', JSON.stringify(user, null, 2));
+  console.log('User keys:', Object.keys(user || {}));
+  console.log('User._id:', user?._id);
+  console.log('User.id:', user?.id);
+  console.log('================================');
+
   if (!user) {
     console.error('User validation failed: user is null/undefined');
     return false;
   }
   
-  if (typeof user.id !== 'string') {
-    console.error('User validation failed: id is not string', typeof user.id, user.id);
+  // Handle both _id and id formats for compatibility
+  const userId = user.id || user._id;
+  if (!userId || (typeof userId !== 'string' && typeof userId !== 'object')) {
+    console.error('User validation failed: id//_id is invalid', typeof userId, userId);
     return false;
+  }
+  
+  // Convert ObjectId to string if needed
+  if (typeof userId === 'object' && userId.toString) {
+    user.id = userId.toString();
+  } else if (typeof userId === 'string') {
+    user.id = userId;
   }
   
   if (typeof user.username !== 'string') {
