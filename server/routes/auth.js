@@ -86,7 +86,10 @@ router.post('/login', [
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ 
+        error: 'Validation failed',
+        details: errors.array().map(e => e.msg).join(', ')
+      });
     }
 
     const { email, password } = req.body;
@@ -107,18 +110,31 @@ router.post('/login', [
       { expiresIn: '7d' }
     );
 
+    const userData = {
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      preferences: user.preferences,
+      subscription: user.subscription
+    };
+
+    console.log('Login successful for user:', userData.email, 'ID:', userData.id);
+
     res.json({
       token,
-      user: {
-        id: user._id.toString(),
-        username: user.username,
-        email: user.email,
-        preferences: user.preferences,
-        subscription: user.subscription
-      }
+      user: userData
     });
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('Login error:', error);
+    
+    // Database connection errors
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerError') {
+      return res.status(503).json({ 
+        error: 'Database temporarily unavailable. Please try again later.' 
+      });
+    }
+    
+    res.status(500).json({ error: 'Server error during login' });
   }
 });
 
@@ -137,8 +153,16 @@ router.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(user);
+    // Transform user data to match frontend expectations
+    res.json({
+      id: user._id.toString(),
+      username: user.username,
+      email: user.email,
+      preferences: user.preferences,
+      subscription: user.subscription
+    });
   } catch (error) {
+    console.error('Get user error:', error);
     res.status(401).json({ error: 'Invalid token' });
   }
 });

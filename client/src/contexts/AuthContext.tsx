@@ -180,11 +180,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('Attempting login for:', email);
       const response = await axios.post('/api/auth/login', { email, password });
+      console.log('Login response received:', response.data);
+      
       const { token, user } = response.data;
       
-      if (!token || !user || !validateUser(user)) {
-        throw new Error('Invalid login response');
+      if (!token) {
+        console.error('Login failed: No token in response');
+        throw new Error('No authentication token received');
+      }
+      
+      if (!user) {
+        console.error('Login failed: No user data in response');
+        throw new Error('No user data received');
+      }
+
+      console.log('Validating user data:', user);
+      if (!validateUser(user)) {
+        console.error('Login failed: User validation failed');
+        throw new Error('Invalid user data structure');
       }
       
       localStorage.setItem('token', token);
@@ -193,8 +208,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (mountedRef.current) {
         dispatch({ type: 'SET_USER', payload: user });
       }
-    } catch (error) {
+      
+      console.log('Login successful');
+    } catch (error: any) {
       console.error('Login failed:', error);
+      
+      // If it's an axios error, get the response error message
+      if (error.response?.data?.error) {
+        throw new Error(error.response.data.error);
+      }
+      
       throw error;
     }
   };
