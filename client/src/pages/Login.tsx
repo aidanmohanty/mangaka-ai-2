@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { EyeIcon, EyeOffIcon, MailIcon, LockIcon } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getAuthErrorMessage } from '../utils/errorUtils';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -25,10 +26,7 @@ const Login: React.FC = () => {
       navigate('/dashboard', { replace: true });
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.error || 
-                          error.response?.data?.message || 
-                          error.message || 
-                          'Login failed. Please try again.';
+      const errorMessage = getAuthErrorMessage(error);
       setError(errorMessage);
     } finally {
       setLoading(false);

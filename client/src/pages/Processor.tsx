@@ -9,6 +9,7 @@ import {
   SparklesIcon
 } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getErrorMessage } from '../utils/errorUtils';
 
 const Processor: React.FC = () => {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ const Processor: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState('');
 
   const languages = [
     { code: 'en', name: 'English' },
@@ -73,6 +75,7 @@ const Processor: React.FC = () => {
 
     setProcessing(true);
     setResult(null);
+    setError('');
 
     try {
       // This would connect to your backend API
@@ -89,6 +92,8 @@ const Processor: React.FC = () => {
       });
     } catch (error) {
       console.error('Processing error:', error);
+      const errorMessage = getErrorMessage(error, 'Failed to process image. Please try again.');
+      setError(errorMessage);
     } finally {
       setProcessing(false);
     }
@@ -117,6 +122,13 @@ const Processor: React.FC = () => {
         {!canProcess && (
           <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200">
             You've reached your processing quota. Please upgrade your plan to continue.
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-200 text-sm">
+            {error}
           </div>
         )}
 

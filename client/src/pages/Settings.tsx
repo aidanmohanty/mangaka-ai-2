@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import { SaveIcon, UserIcon, GlobeIcon, PaletteIcon } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getErrorMessage } from '../utils/errorUtils';
 
 const Settings: React.FC = () => {
   const { user, updatePreferences } = useAuth();
@@ -49,7 +50,8 @@ const Settings: React.FC = () => {
       await updatePreferences(preferences);
       setMessage('Settings saved successfully!');
     } catch (error) {
-      setMessage('Failed to save settings');
+      const errorMessage = getErrorMessage(error, 'Failed to save settings');
+      setMessage(errorMessage);
     } finally {
       setLoading(false);
     }
