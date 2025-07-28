@@ -38,10 +38,41 @@ const io = socketIo(server, {
 const PORT = process.env.PORT || 5000;
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5001';
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mangaka-ai')
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// Connect to MongoDB with proper Vercel configuration
+const connectDB = async () => {
+  try {
+    if (!process.env.MONGODB_URI) {
+      throw new Error('MONGODB_URI environment variable is not set');
+    }
+    
+    const conn = await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      bufferCommands: false,
+      bufferMaxEntries: 0
+    });
+    
+    console.log(`MongoDB connected: ${conn.connection.host}`);
+    
+    // Handle connection errors after initial connection
+    mongoose.connection.on('error', (err) => {
+      console.error('MongoDB connection error:', err);
+    });
+    
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected');
+    });
+    
+  } catch (error) {
+    console.error('MongoDB connection failed:', error.message);
+    process.exit(1);
+  }
+};
+
+connectDB();
 
 // Security middleware
 app.use(helmet());
@@ -86,12 +117,28 @@ app.get('/api/health', async (req, res) => {
 // Secure file upload configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    const fs = require('fs');
+    const uploadDir = "uploads/";
+    
+    // Ensure upload directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    // Sanitize filename and add timestamp
-    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-    cb(null, Date.now() + "-" + sanitizedName);
+    // Generate secure random filename
+    const crypto = require('crypto');
+    const extension = path.extname(file.originalname).toLowerCase();
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+    
+    if (!allowedExtensions.includes(extension)) {
+      return cb(new Error('Invalid file extension'), false);
+    }
+    
+    const randomName = crypto.randomBytes(16).toString('hex');
+    cb(null, `${Date.now()}-${randomName}${extension}`);
   }
 });
 
@@ -219,6 +266,16 @@ app.post('/api/process-url', authenticateToken, async (req, res) => {
 
     if (!url) {
       return res.status(400).json({ error: 'No URL provided' });
+    }
+
+    // Validate URL format
+    try {
+      const parsedUrl = new URL(url);
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        return res.status(400).json({ error: 'Only HTTP and HTTPS URLs are allowed' });
+      }
+    } catch (error) {
+      return res.status(400).json({ error: 'Invalid URL format' });
     }
 
     // Check user quota

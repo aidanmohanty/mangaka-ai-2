@@ -21,11 +21,58 @@ class MangaProcessor:
         
     def download_image(self, url):
         try:
-            response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+            # Validate URL scheme to prevent SSRF attacks
+            from urllib.parse import urlparse
+            parsed_url = urlparse(url)
+            
+            if parsed_url.scheme not in ['http', 'https']:
+                raise Exception("Only HTTP and HTTPS URLs are allowed")
+            
+            # Block private IP ranges and localhost
+            import socket
+            hostname = parsed_url.hostname
+            if hostname:
+                try:
+                    ip = socket.gethostbyname(hostname)
+                    # Block localhost, private networks, and link-local addresses
+                    if (ip.startswith('127.') or 
+                        ip.startswith('10.') or 
+                        ip.startswith('192.168.') or 
+                        ip.startswith('172.') or
+                        ip.startswith('169.254.') or
+                        ip == '0.0.0.0'):
+                        raise Exception("Access to private/local addresses is not allowed")
+                except socket.gaierror:
+                    raise Exception("Invalid hostname")
+            
+            # Set timeout and size limits
+            response = requests.get(
+                url, 
+                headers={'User-Agent': 'MangaAI-Bot/1.0'}, 
+                timeout=10,
+                stream=True
+            )
             response.raise_for_status()
             
-            image = Image.open(io.BytesIO(response.content))
-            temp_path = f"temp/downloaded_{hash(url)}.jpg"
+            # Check content type
+            content_type = response.headers.get('content-type', '')
+            if not content_type.startswith('image/'):
+                raise Exception("URL does not point to a valid image")
+            
+            # Check file size (max 10MB)
+            content_length = response.headers.get('content-length')
+            if content_length and int(content_length) > 10 * 1024 * 1024:
+                raise Exception("Image file too large (max 10MB)")
+            
+            # Download with size limit
+            content = b''
+            for chunk in response.iter_content(chunk_size=8192):
+                content += chunk
+                if len(content) > 10 * 1024 * 1024:  # 10MB limit
+                    raise Exception("Image file too large (max 10MB)")
+            
+            image = Image.open(io.BytesIO(content))
+            temp_path = f"temp/downloaded_{abs(hash(url))}.jpg"
             image.save(temp_path)
             return temp_path
         except Exception as e:

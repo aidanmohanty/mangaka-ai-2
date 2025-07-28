@@ -10,7 +10,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
 }
 
@@ -57,7 +57,7 @@ code {
                0 0 60px rgba(139, 69, 19, 0.2);
 }
 
-/* Gradient text */
+/* Gradient text utilities */
 .gradient-text {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
@@ -65,11 +65,84 @@ code {
   background-clip: text;
 }
 
-/* Custom input focus states */
+.gradient-text-brand {
+  background: linear-gradient(135deg, #ea580c 0%, #d946ef 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-hero {
+  background: linear-gradient(135deg, #ea580c 0%, #d946ef 50%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced accessibility focus states */
 .input-focus:focus {
   ring-width: 2px;
-  ring-color: rgba(102, 126, 234, 0.5);
-  border-color: #667eea;
+  ring-color: rgba(234, 88, 12, 0.5);
+  border-color: #ea580c;
+  outline: none;
+}
+
+/* High contrast focus indicators for accessibility */
+.focus-visible:focus-visible {
+  outline: 2px solid #ea580c;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(234, 88, 12, 0.2);
+}
+
+/* Improved button focus states */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #ea580c;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glass {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+  }
+  
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .speed-lines::after {
+    animation: none;
+  }
+  
+  .manga-progress::before {
+    animation: none;
+  }
 }
 
 /* Processing animation */
@@ -82,10 +155,12 @@ code {
   animation: processing 1s linear infinite;
 }
 
-/* Manga panel effect */
+/* Manga-specific visual effects */
 .manga-panel {
   position: relative;
   overflow: hidden;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .manga-panel::before {
@@ -97,12 +172,110 @@ code {
   bottom: 0;
   background: linear-gradient(
     45deg,
-    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.05) 25%,
     transparent 25%,
     transparent 75%,
-    rgba(255, 255, 255, 0.1) 75%
+    rgba(255, 255, 255, 0.05) 75%
   );
   background-size: 20px 20px;
-  opacity: 0.3;
+  opacity: 0.6;
   pointer-events: none;
+}
+
+/* Speed lines effect for dynamic elements */
+.speed-lines {
+  position: relative;
+  overflow: hidden;
+}
+
+.speed-lines::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 75%,
+    transparent 100%
+  );
+  transform: skewX(-45deg);
+  animation: speed-lines 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes speed-lines {
+  0% { transform: translateX(-100%) skewX(-45deg); }
+  100% { transform: translateX(100%) skewX(-45deg); }
+}
+
+/* Speech bubble-inspired containers */
+.speech-bubble {
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  border-radius: 20px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 20px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 10px 10px 0 10px;
+  border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent;
+}
+
+/* Anime-style glow effects */
+.anime-glow {
+  box-shadow: 
+    0 0 20px rgba(234, 88, 12, 0.3),
+    0 0 40px rgba(217, 70, 239, 0.2),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.anime-glow:hover {
+  box-shadow: 
+    0 0 30px rgba(234, 88, 12, 0.5),
+    0 0 60px rgba(217, 70, 239, 0.3),
+    inset 0 0 30px rgba(255, 255, 255, 0.15);
+}
+
+/* Dynamic progress bars with manga flair */
+.manga-progress {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.manga-progress::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(255, 255, 255, 0.1) 2px,
+    rgba(255, 255, 255, 0.1) 4px
+  );
+  animation: manga-progress-pattern 2s linear infinite;
+}
+
+@keyframes manga-progress-pattern {
+  0% { transform: translateX(-8px); }
+  100% { transform: translateX(0px); }
 }

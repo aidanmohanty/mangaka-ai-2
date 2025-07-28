@@ -74,7 +74,7 @@ const Navbar: React.FC = () => {
                 <div className="hidden sm:flex items-center space-x-2 text-white/80">
                   <UserCircleIcon size={20} />
                   <span className="font-medium">{user.username}</span>
-                  <div className="text-xs bg-gradient-to-r from-orange-400 to-pink-400 px-2 py-1 rounded-full">
+                  <div className="text-xs bg-brand-primary px-2 py-1 rounded-full">
                      {user?.subscription ? `${user.subscription.used}/${user.subscription.processingQuota}` : '0/100'}
                   </div>
                 </div>
@@ -96,7 +96,7 @@ const Navbar: React.FC = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-gradient-to-r from-orange-400 to-pink-400 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-500 hover:to-pink-500 transition-all duration-200 shadow-lg"
+                  className="bg-brand-primary text-white px-4 py-2 rounded-lg font-medium hover:scale-105 transition-all duration-200 shadow-lg"
                 >
                   Sign Up
                 </Link>
@@ -149,7 +149,7 @@ const Navbar: React.FC = () => {
                 <div className="flex items-center space-x-3 px-3 py-2 text-white/60">
                   <UserCircleIcon size={20} />
                   <span>{user.username}</span>
-                  <div className="ml-auto text-xs bg-gradient-to-r from-orange-400 to-pink-400 px-2 py-1 rounded-full">
+                  <div className="ml-auto text-xs bg-brand-primary px-2 py-1 rounded-full">
                     {user.subscription.used}/{user.subscription.processingQuota}
                   </div>
                 </div>

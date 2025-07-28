@@ -47,14 +47,14 @@ const Dashboard: React.FC = () => {
       description: 'Upload or paste URL to translate manga',
       icon: SparklesIcon,
       link: '/process',
-      color: 'from-orange-400 to-pink-400'
+      color: 'bg-brand-primary'
     },
     {
       title: 'View History',
       description: 'See your previous translations',
       icon: ClockIcon,
       link: '/history',
-      color: 'from-blue-400 to-purple-400'
+      color: 'bg-brand-accent'
     }
   ];
 
@@ -117,7 +117,7 @@ const Dashboard: React.FC = () => {
                   className="block glass rounded-xl p-6 hover:bg-white/15 transition-all duration-300 group"
                 >
                   <div className="flex items-start space-x-4">
-                    <div className={`w-12 h-12 bg-gradient-to-r ${action.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                    <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
                       <Icon size={24} className="text-white" />
                     </div>
                     <div className="flex-1">
@@ -167,7 +167,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="w-full bg-white/10 rounded-full h-2">
                 <div 
-                  className="bg-gradient-to-r from-orange-400 to-pink-400 h-2 rounded-full transition-all duration-300"
+                  className="bg-brand-primary h-2 rounded-full transition-all duration-300"
                   style={{ 
                     width: `${((user?.subscription?.used || 0) / (user?.subscription?.processingQuota || 1)) * 100}%` 
                   }}
@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
                 <p className="text-white/70 text-sm mb-3">
                   Upgrade to Premium for unlimited processing and AI coloring
                 </p>
-                <button className="bg-gradient-to-r from-orange-400 to-pink-400 text-white px-4 py-2 rounded-lg font-medium hover:from-orange-500 hover:to-pink-500 transition-all duration-300">
+                <button className="bg-brand-primary text-white px-4 py-2 rounded-lg font-medium hover:scale-105 transition-all duration-300">
                   Upgrade Now
                 </button>
               </div>
