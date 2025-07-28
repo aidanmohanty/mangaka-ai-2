@@ -63,6 +63,26 @@ app.use('/uploads', express.static('uploads'));
 // Routes
 app.use('/api/auth', authRoutes);
 
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    // Check database connection
+    await mongoose.connection.db.admin().ping();
+    res.json({ 
+      status: 'healthy', 
+      database: 'connected',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(503).json({ 
+      status: 'unhealthy', 
+      database: 'disconnected',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Secure file upload configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

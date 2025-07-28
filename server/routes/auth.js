@@ -49,6 +49,31 @@ router.post('/register', [
       }
     });
   } catch (error) {
+    console.error('Registration error:', error.message, error.stack);
+    
+    // Handle specific MongoDB errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ 
+        error: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists` 
+      });
+    }
+    
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(e => e.message);
+      return res.status(400).json({ 
+        error: 'Validation failed',
+        details: messages.join(', ')
+      });
+    }
+    
+    // Database connection errors
+    if (error.name === 'MongoNetworkError' || error.name === 'MongoServerError') {
+      return res.status(503).json({ 
+        error: 'Database temporarily unavailable. Please try again later.' 
+      });
+    }
+    
     res.status(500).json({ error: 'Server error' });
   }
 });
