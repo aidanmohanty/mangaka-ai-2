@@ -38,34 +38,38 @@ const io = socketIo(server, {
 const PORT = process.env.PORT || 5000;
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://localhost:5001';
 
-// Connect to MongoDB with proper Vercel configuration
+// Connect to MongoDB with fallback for development
 const connectDB = async () => {
   try {
     if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI environment variable is not set');
+      console.warn('⚠️  MONGODB_URI not set. Server will start but database features will be disabled.');
+      return;
     }
+    
+    console.log('🔄 Attempting MongoDB connection...');
     
     const conn = await mongoose.connect(process.env.MONGODB_URI, {
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
       bufferCommands: false
     });
     
-    console.log(`MongoDB connected: ${conn.connection.host}`);
+    console.log(`✅ MongoDB connected: ${conn.connection.host}`);
     
     // Handle connection errors after initial connection
     mongoose.connection.on('error', (err) => {
-      console.error('MongoDB connection error:', err);
+      console.error('❌ MongoDB connection error:', err);
     });
     
     mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
+      console.log('🔌 MongoDB disconnected');
     });
     
   } catch (error) {
-    console.error('MongoDB connection failed:', error.message);
-    process.exit(1);
+    console.error('❌ MongoDB connection failed:', error.message);
+    console.log('🚀 Server starting without database connection...');
+    // Don't exit - let server start for testing
   }
 };
 
